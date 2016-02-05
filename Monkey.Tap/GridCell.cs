@@ -31,6 +31,12 @@ namespace Monkey.Tap
 			CountDown = TimeSpan.FromSeconds (5);
 			Transition = 0f;
 		}
+
+		public void Show()
+		{
+			Color = Color.White;
+			CountDown = TimeSpan.FromSeconds (5);
+		}
 	}
 }
 

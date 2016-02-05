@@ -121,11 +121,7 @@ namespace Monkey.Tap.Droid
 			switch (currentState) {
 			case GameState.Start:
 				if (touchState.Count > 0) {
-					foreach (var location in touchState) {
-						if (location.State == TouchLocationState.Released) {
-							currentState = GameState.Playing;
-						}
-					}
+					currentState = GameState.Playing;
 				}
 				break;
 			case GameState.Playing:
@@ -134,19 +130,15 @@ namespace Monkey.Tap.Droid
 			case GameState.GameOver:
 				tapToRestartTimer -= gameTime.ElapsedGameTime;
 				if (touchState.Count > 0 && tapToRestartTimer.TotalMilliseconds < 0) {
-					foreach (var location in touchState) {
-						if (location.State == TouchLocationState.Released) {
-							currentState = GameState.Start;
-							score = 0;
-							changeTimer = TimeSpan.FromMilliseconds (0);
-							gameTimer = TimeSpan.FromMilliseconds (0);
-							changeDelay = TimeSpan.FromSeconds (2);
-							staggerTimerMax = 500;
-							cellsToChange = 1;
-							for (int i = 0; i < grid.Count; i++) {
-								grid [i].Reset ();
-							}
-						}
+					currentState = GameState.Start;
+					score = 0;
+					changeTimer = TimeSpan.FromMilliseconds (0);
+					gameTimer = TimeSpan.FromMilliseconds (0);
+					changeDelay = TimeSpan.FromSeconds (2);
+					staggerTimerMax = 500;
+					cellsToChange = 1;
+					for (int i = 0; i < grid.Count; i++) {
+						grid [i].Reset ();
 					}
 				}
 				break;
@@ -184,15 +176,16 @@ namespace Monkey.Tap.Droid
 			increaseLevelTimer += gameTime.ElapsedGameTime;
 			staggerShowCellTimer -= gameTime.ElapsedGameTime;
 
-			// if 
+			// stagger the displaying of the cells so they don't all appear at once
 			if (changeTimer.TotalMilliseconds > changeDelay.TotalMilliseconds) {
 				if (cellsToChange > 0 && staggerShowCellTimer.TotalMilliseconds <= 0) {
 					staggerShowCellTimer = TimeSpan.FromMilliseconds (staggerTimerMax);
 					var idx = rnd.Next (grid.Count);
+					// check the cell isn't already visible
 					if (grid [idx].Color == Color.TransparentBlack) {
-						grid [idx].Color = Color.White;
-						grid [idx].CountDown = TimeSpan.FromSeconds (5);
+						grid [idx].Show ();
 						cellsToChange--;
+						// we have have shown all the cells reset the timer.
 						if (cellsToChange == 0)
 							changeTimer = TimeSpan.FromMilliseconds (0);
 					}
@@ -205,10 +198,13 @@ namespace Monkey.Tap.Droid
 				maxCells++;
 			}
 
+			// every 2 seconds make the game harder :)
 			if (gameTimer.TotalSeconds > 2) {
 				gameTimer = TimeSpan.FromMilliseconds (0);
 				cellsToChange = Math.Min (maxCells, maxCellsToChange);
 				if (cellsToChange == maxCellsToChange) {
+					// if we reached the max number of cells to change
+					// reduce the delay between showing cells
 					changeDelay -= TimeSpan.FromMilliseconds (40);
 					if (changeDelay.TotalMilliseconds < 10)
 						changeDelay = TimeSpan.FromMilliseconds (10);
@@ -224,26 +220,38 @@ namespace Monkey.Tap.Droid
 		protected override void Draw (GameTime gameTime)
 		{
 			graphics.GraphicsDevice.Clear (Color.SaddleBrown);
+			// calcualte the center of the screen
 			var center = graphics.GraphicsDevice.Viewport.Bounds.Center.ToVector2();
+			// calcualte half the width of the screen
 			var half = graphics.GraphicsDevice.Viewport.Width / 2;
+			// figure out the aspect ratio of the logo.
 			var aspect = (float)logo.Height / logo.Width;
+			// now figure out where to draw the logo on the screen
 			var rect = new Rectangle ((int)center.X - (half /2) , 0, half, (int)(half * aspect));
-			// draw a Grid of Squares
+
 			spriteBatch.Begin ();
+			// draw the background
 			spriteBatch.Draw (background, destinationRectangle: graphics.GraphicsDevice.Viewport.Bounds, color: Color.White);
+			// draw the logo
 			spriteBatch.Draw (logo, destinationRectangle: rect, color: Color.White);
+			// draw a Grid of Squares
 			foreach (var square in grid) {
 				spriteBatch.Draw (monkey, destinationRectangle: square.DisplayRectangle,
 					color: Color.Lerp (Color.TransparentBlack, square.Color, square.Transition));
 			}
+			// if we are finished draw the score and Gameover in the center of the screen.
 			if (currentState == GameState.GameOver) {
+				// measure the text so we can center it correctly.
 				var v = new Vector2(font.MeasureString (gameOverText).X /2 , 0);
 				spriteBatch.DrawString (font, gameOverText, center - v, Color.MonoGameOrange);
 				var t = string.Format (scoreText, score);
+				// measure the text so we can center it correctly.
 				v = new Vector2(font.MeasureString (t).X /2 , 0);
+				// we use the font.LineSpacing to draw on the line underneath the gameover Text
 				spriteBatch.DrawString (font, t, center  + new Vector2(-v.X, font.LineSpacing), Color.White);
 			}
 			if (currentState == GameState.Start) {
+				// measure the text so we can center it correctly.
 				var v = new Vector2(font.MeasureString (tapToStartText).X /2 , 0);
 				spriteBatch.DrawString (font, tapToStartText, center - v, Color.White);
 			}
