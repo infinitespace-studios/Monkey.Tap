@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework.Media;
 
 #endregion
 
-namespace Monkey.Tap.Droid
+namespace Monkey.Tap
 {
 	/// <summary>
 	/// This is the main type for your game.
@@ -83,8 +83,8 @@ namespace Monkey.Tap.Droid
 			font = Content.Load<SpriteFont> ("font");
 			hit = Content.Load<SoundEffect> ("hit");
 			title = Content.Load<Song> ("title");
-			MediaPlayer.IsRepeating = true;
-			MediaPlayer.Play (title);
+			Microsoft.Xna.Framework.Media.MediaPlayer.IsRepeating = true;
+			Microsoft.Xna.Framework.Media.MediaPlayer.Play (title);
 
 			var viewport = graphics.GraphicsDevice.Viewport;
 			var padding = (viewport.Width / 100);
@@ -243,7 +243,7 @@ namespace Monkey.Tap.Droid
 			if (currentState == GameState.GameOver) {
 				// measure the text so we can center it correctly.
 				var v = new Vector2(font.MeasureString (gameOverText).X /2 , 0);
-				spriteBatch.DrawString (font, gameOverText, center - v, Color.MonoGameOrange);
+				spriteBatch.DrawString (font, gameOverText, center - v, Color.OrangeRed);
 				var t = string.Format (scoreText, score);
 				// measure the text so we can center it correctly.
 				v = new Vector2(font.MeasureString (t).X /2 , 0);
