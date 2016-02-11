@@ -1,0 +1,19 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Monkey.Tap", "Monkey.Tap\Monkey.Tap.shproj", "{A97D6D83-6BBA-4725-9E0F-470CE71970CE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monkey.Tap.Droid", "Monkey.Tap.Droid\Monkey.Tap.Droid.csproj", "{131CAD61-649B-4F90-B4B6-58318AC33347}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{131CAD61-649B-4F90-B4B6-58318AC33347}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{131CAD61-649B-4F90-B4B6-58318AC33347}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{131CAD61-649B-4F90-B4B6-58318AC33347}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{131CAD61-649B-4F90-B4B6-58318AC33347}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
