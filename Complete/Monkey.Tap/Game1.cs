@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework.Input.Touch;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Media;
+using System.Collections;
 
 #endregion
 
@@ -35,16 +36,12 @@ namespace Monkey.Tap
 		string gameOverText = "Game Over";
 		string tapToStartText = "Tap to Start";
 		string scoreText = "Score : {0}";
-		TimeSpan changeTimer = TimeSpan.FromMilliseconds (0);
 		TimeSpan gameTimer = TimeSpan.FromMilliseconds (0);
-		TimeSpan changeDelay = TimeSpan.FromSeconds (2);
 		TimeSpan increaseLevelTimer = TimeSpan.FromMilliseconds(0);
-		TimeSpan staggerShowCellTimer = TimeSpan.FromMilliseconds (500);
 		TimeSpan tapToRestartTimer = TimeSpan.FromSeconds(2);
 		int cellsToChange = 0;
 		int maxCells = 1;
 		int maxCellsToChange = 14;
-		int staggerTimerMax = 500;
 		int score = 0;
 
 		public Game1 ()
@@ -132,10 +129,7 @@ namespace Monkey.Tap
 				if (touchState.Count > 0 && tapToRestartTimer.TotalMilliseconds < 0) {
 					currentState = GameState.Start;
 					score = 0;
-					changeTimer = TimeSpan.FromMilliseconds (0);
 					gameTimer = TimeSpan.FromMilliseconds (0);
-					changeDelay = TimeSpan.FromSeconds (2);
-					staggerTimerMax = 500;
 					cellsToChange = 1;
 					for (int i = 0; i < grid.Count; i++) {
 						grid [i].Reset ();
@@ -146,9 +140,8 @@ namespace Monkey.Tap
 			base.Update (gameTime);
 		}
 
-		void PlayGame(GameTime gameTime, TouchCollection touchState)
+		void ProcessTouches(TouchCollection touchState)
 		{
-			// process the touchstate
 			foreach (var touch in touchState) {
 				if (touch.State != TouchLocationState.Released)
 					continue;
@@ -160,8 +153,10 @@ namespace Monkey.Tap
 					}
 				}
 			}
-				
-			// Update the grid and check for game over
+		}
+
+		void CheckForGameOver (GameTime gameTime)
+		{
 			for (int i = 0; i < grid.Count; i++) {
 				if (grid [i].Update (gameTime)) {
 					currentState = GameState.GameOver;
@@ -169,48 +164,47 @@ namespace Monkey.Tap
 					break;
 				}
 			}
+		}
 
-			// increment all the timers by the ElaspedGameTime
-			changeTimer += gameTime.ElapsedGameTime;
-			gameTimer += gameTime.ElapsedGameTime;
-			increaseLevelTimer += gameTime.ElapsedGameTime;
-			staggerShowCellTimer -= gameTime.ElapsedGameTime;
-
-			// stagger the displaying of the cells so they don't all appear at once
-			if (changeTimer.TotalMilliseconds > changeDelay.TotalMilliseconds) {
-				if (cellsToChange > 0 && staggerShowCellTimer.TotalMilliseconds <= 0) {
-					staggerShowCellTimer = TimeSpan.FromMilliseconds (staggerTimerMax);
-					var idx = rnd.Next (grid.Count);
-					// check the cell isn't already visible
-					if (grid [idx].Color == Color.TransparentBlack) {
-						grid [idx].Show ();
-						cellsToChange--;
-						// we have have shown all the cells reset the timer.
-						if (cellsToChange == 0)
-							changeTimer = TimeSpan.FromMilliseconds (0);
-					}
+		void CalculateCellsToChange ()
+		{
+			if (gameTimer.TotalSeconds > 2) {
+				gameTimer = TimeSpan.FromMilliseconds (0);
+				cellsToChange = Math.Min (maxCells, maxCellsToChange);
+			}
+		}
+			
+		void MakeMonkeysVisible()
+		{
+			if (cellsToChange > 0) {
+				var idx = rnd.Next (grid.Count);
+				// check the cell isn't already visible
+				if (grid [idx].Color == Color.TransparentBlack) {
+					grid [idx].Show ();
+					cellsToChange--;
 				}
 			}
+		}
 
-			// increase the maximum number of cells we can change
+		void IncreaseLevel ()
+		{
 			if (increaseLevelTimer.TotalSeconds > 10) {
 				increaseLevelTimer = TimeSpan.FromMilliseconds (0);
 				maxCells++;
 			}
+		}
 
-			// every 2 seconds make the game harder :)
-			if (gameTimer.TotalSeconds > 2) {
-				gameTimer = TimeSpan.FromMilliseconds (0);
-				cellsToChange = Math.Min (maxCells, maxCellsToChange);
-				if (cellsToChange == maxCellsToChange) {
-					// if we reached the max number of cells to change
-					// reduce the delay between showing cells
-					changeDelay -= TimeSpan.FromMilliseconds (40);
-					if (changeDelay.TotalMilliseconds < 10)
-						changeDelay = TimeSpan.FromMilliseconds (10);
-					staggerTimerMax = Math.Max(staggerTimerMax-10, 20);
-				}
-			}
+		void PlayGame(GameTime gameTime, TouchCollection touchState)
+		{
+			// increment all the timers by the ElaspedGameTime
+			gameTimer += gameTime.ElapsedGameTime;
+			increaseLevelTimer += gameTime.ElapsedGameTime;
+
+			ProcessTouches (touchState);
+			CheckForGameOver (gameTime);
+			CalculateCellsToChange ();
+			MakeMonkeysVisible ();
+			IncreaseLevel ();
 		}
 
 		/// <summary>
