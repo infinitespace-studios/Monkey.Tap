@@ -128,11 +128,10 @@ namespace Monkey.Tap
 				if (touchState.Count > 0 && tapToRestartTimer.TotalMilliseconds < 0) {
 					currentState = GameState.Start;
 					score = 0;
-					changeTimer = TimeSpan.FromMilliseconds (0);
+					increaseLevelTimer = TimeSpan.FromMilliseconds (0);
 					gameTimer = TimeSpan.FromMilliseconds (0);
-					changeDelay = TimeSpan.FromSeconds (2);
-					staggerTimerMax = 500;
 					cellsToChange = 1;
+					maxCells = 1;
 					for (int i = 0; i < grid.Count; i++) {
 						grid [i].Reset ();
 					}
@@ -168,8 +167,9 @@ namespace Monkey.Tap
 			}
 		}
 
-		void CalculateCellsToChange ()
+		void CalculateCellsToChange (GameTime gameTime)
 		{
+			gameTimer += gameTime.ElapsedGameTime;
 			if (gameTimer.TotalSeconds > 2) {
 				gameTimer = TimeSpan.FromMilliseconds (0);
 				cellsToChange = Math.Min (maxCells, maxCellsToChange);
@@ -180,7 +180,6 @@ namespace Monkey.Tap
 		{
 			if (cellsToChange > 0) {
 				var idx = rnd.Next (grid.Count);
-				// check the cell isn't already visible
 				if (grid [idx].Color == Color.TransparentBlack) {
 					grid [idx].Show ();
 					cellsToChange--;
@@ -188,8 +187,9 @@ namespace Monkey.Tap
 			}
 		}
 
-		void IncreaseLevel ()
+		void IncreaseLevel (GameTime gameTime)
 		{
+			increaseLevelTimer += gameTime.ElapsedGameTime;
 			if (increaseLevelTimer.TotalSeconds > 10) {
 				increaseLevelTimer = TimeSpan.FromMilliseconds (0);
 				maxCells++;
@@ -198,15 +198,11 @@ namespace Monkey.Tap
 
 		void PlayGame(GameTime gameTime, TouchCollection touchState)
 		{
-			// increment all the timers by the ElaspedGameTime
-			gameTimer += gameTime.ElapsedGameTime;
-			increaseLevelTimer += gameTime.ElapsedGameTime;
-
 			ProcessTouches (touchState);
 			CheckForGameOver (gameTime);
-			CalculateCellsToChange ();
+			CalculateCellsToChange (gameTime);
 			MakeMonkeysVisible ();
-			IncreaseLevel ();
+			IncreaseLevel (gameTime);
 		}
 
 		/// <summary>
