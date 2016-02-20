@@ -39,6 +39,11 @@
     <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
     <ConsolePause>false</ConsolePause>
     <AndroidSupportedAbis>armeabi-v7a;x86</AndroidSupportedAbis>
+    <AndroidKeyStore>True</AndroidKeyStore>
+    <AndroidSigningKeyStore>/Users/dean/Documents/InfinitespaceStudios.keystore</AndroidSigningKeyStore>
+    <AndroidSigningStorePass>infsp4c3stud10s</AndroidSigningStorePass>
+    <AndroidSigningKeyAlias>InfinitespaceStudios</AndroidSigningKeyAlias>
+    <AndroidSigningKeyPass>infsp4c3stud10s</AndroidSigningKeyPass>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
